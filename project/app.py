@@ -34,17 +34,31 @@ class User (db.Model, UserMixin):
         return f'User({self.username}, {self.email})'
     
 
+class blogpost(db.Model):
+    id= db.Column(db.Integer, primary_key=True)
+    title = db.Column (db.String(100), nullable =False)
+    author = db.Column(db.String)
+    time = db.Column(db.DateTime)
+    niche= db.Column(db.String())
+    content = db.Column(db.Text)
+
 class RegisterForm(FlaskForm):
     username = StringField (validators=[InputRequired(), Length(min=4, max=20)], render_kw={"placeholder": "Username"})
     email= EmailField(validators=[InputRequired(),Email(message='Invalid Email address')], render_kw={"placeholder":"Email"})
     password = PasswordField(validators=[InputRequired(),Length(min=4, max =20)], render_kw={"placeholder":"Password"})
     submit= SubmitField('Register')
 
-    def validate_username(self,username):
+    def validate_username(self, username):
         existing_User_username = User.query.filter_by(username=username.data).first()
 
         if existing_User_username:
             raise ValidationError("This username exists, choose a different one")
+        
+    def validate_email (self, email):
+        existing_email =  User.query.filter_by(email=email.data).first()
+
+        if existing_email:
+            raise ValidationError("This email esxists, choose a differnet one")
 
 
 class LoginForm(FlaskForm):
