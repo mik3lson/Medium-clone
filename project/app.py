@@ -34,14 +34,6 @@ class User (db.Model, UserMixin):
         return f'User({self.username}, {self.email})'
     
 
-class blogpost(db.Model):
-    id= db.Column(db.Integer, primary_key=True)
-    title = db.Column (db.String(100), nullable =False)
-    author = db.Column(db.String)
-    time = db.Column(db.DateTime)
-    niche= db.Column(db.String())
-    content = db.Column(db.Text)
-
 class RegisterForm(FlaskForm):
     username = StringField (validators=[InputRequired(), Length(min=4, max=20)], render_kw={"placeholder": "Username"})
     email= EmailField(validators=[InputRequired(),Email(message='Invalid Email address')], render_kw={"placeholder":"Email"})
@@ -67,6 +59,12 @@ class LoginForm(FlaskForm):
     password = PasswordField(validators=[InputRequired(),Length(min=4, max =20)], render_kw={"placeholder":"Password"})
     submit= SubmitField('Login')
 
+class blogPostForm(FlaskForm):
+    title =StringField(validators =[InputRequired()])
+    niche= StringField()
+    content= StringField(validators=[InputRequired()])
+    submit = SubmitField('Post')
+     
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -109,6 +107,12 @@ def login():
 @login_required
 def dashboard():
     return render_template('dashboard.html')
+
+@app.route("/post", methods =['GET','POST'])
+@login_required
+def blog_post():
+    form = blogPostForm()
+    return render_template('blogpost.html', form =form)
 
 @app.route('/logout', methods=['GET','POST'])
 @login_required
