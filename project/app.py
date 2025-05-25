@@ -59,21 +59,23 @@ class LoginForm(FlaskForm):
     password = PasswordField(validators=[InputRequired(),Length(min=4, max =20)], render_kw={"placeholder":"Password"})
     submit= SubmitField('Login')
 
+
 class blogPostForm(FlaskForm):
-    title =StringField(validators =[InputRequired()])
-    niche= StringField()
-    content= StringField(validators=[InputRequired()])
+    title =StringField(validators =[InputRequired()], render_kw={"placeholder":"Title"})
+    niche= StringField(Length(min=3, max =23), render_kw={"placeholder":"Niche"})
+    content= StringField(validators=[InputRequired()], render_kw={"placeholder":"body"})
     submit = SubmitField('Post')
      
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-
+from models import blogPost
 
 @app.route('/')
 def home():
-    return render_template ('home.html')
+    posts = blogPost.query.order_by(blogPost.date_posted.desc()).all()
+    return render_template ('home.html', posts =posts)
 
 @app.route('/register', methods=['GET','POST'])
 def register():
@@ -98,6 +100,8 @@ def login():
             if bcrypt.check_password_hash(user.password, form.password.data):
                 login_user(user)
                 return redirect(url_for('dashboard'))
+            else:
+                return "Password is Invalid"
     return render_template ('login.html', form =form)
 
 
@@ -112,6 +116,11 @@ def dashboard():
 @login_required
 def blog_post():
     form = blogPostForm()
+    if form.validate_on_submit():
+        new_post = blogPost(title=form.title.data, content =form.content.data, niche =form.niche.data)
+        db.session.add(new_post)
+        db.session.commit
+        return redirect(url_for('home'))
     return render_template('blogpost.html', form =form)
 
 @app.route('/logout', methods=['GET','POST'])

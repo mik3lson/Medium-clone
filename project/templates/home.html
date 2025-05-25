@@ -8,6 +8,10 @@
 <body>
     <h1>Welcome to my Medium clone </h1>
     <p> 
+
+        {% for posts in posts %}
+            {{blogPost.title}}
+        {% endfor %}
         <a href="{{url_for('login')}}">Login page </a><br>
         <a href ="{{url_for('register')}}">Sign-up</a>
     </p>
